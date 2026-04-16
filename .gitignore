@@ -1,0 +1,7 @@
+.runtime/
+.claude/
+approval-events.log
+approval-events.jsonl
+state.json
+__pycache__/
+scripts/__pycache__/

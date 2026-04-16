@@ -1,0 +1,14 @@
+{
+  "name": "approval-cn-helper",
+  "version": "1.0.0",
+  "description": "Auto-approve Claude Code permission prompts with a local toggle and Chinese summaries.",
+  "author": {
+    "name": "OpenAI Codex"
+  },
+  "keywords": [
+    "claude-code",
+    "permissions",
+    "hooks",
+    "chinese"
+  ]
+}
