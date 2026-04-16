@@ -1,64 +1,114 @@
-# approval-cn-helper
+# Claude Auto Approval Assistant
 
-这是一个本地 Claude Code 插件，用来做三件事：
+A local Claude Code assistant that reduces repetitive approval prompts, shows Chinese summaries in a floating desktop window, and keeps an approval history you can review later.
 
-1. 在插件开启时，使用 `PermissionRequest` hook 自动批准权限弹窗，减少你手动按 `Yes`。
-2. 把一部分权限相关英文通知写成中文摘要，并在桌面悬浮窗里实时显示。
-3. 把每一次自动同意记录到文本日志和结构化历史日志，方便回顾。
+## What problem this solves
 
-## 使用方法
+When you use Claude Code for multi-step work, repeated `Yes / No` confirmations can break your flow:
 
-### 0. 最省事的双击入口
+- frequent Bash approval prompts interrupt batch work
+- English safety messages are easy to skim past or misunderstand
+- after auto-handling a request, it is hard to remember what was approved
 
-在 `D:\AAAkaifa\Claude助手` 根目录里，直接双击这个 BAT 即可：
+This project packages those needs into one local helper:
 
-- `启动Claude助手.bat`
+- auto-approve normal Claude Code permission requests
+- translate common approval-related notifications into Chinese
+- show the current status and recent history in a desktop floating window
+- keep a local approval log for later review
 
-启动后会默认打开悬浮窗，悬浮窗里直接提供：
+## Why this is implemented as a plugin
 
-- 自动同意开启 / 关闭按钮
-- 当前状态显示
-- 最近审批历史
+This project uses Claude Code hooks instead of UI automation.
 
-### 1. 带插件启动 Claude
+That choice is intentional:
 
-```bat
-D:\AAAkaifa\Claude助手\bin\start-claude-with-helper.cmd
-```
+- it works at the event layer, not by clicking screen coordinates
+- it is more stable than simulating mouse or keyboard actions
+- it can inspect request metadata and write meaningful logs
+- it can be turned on or off without patching Claude itself
 
-这个启动脚本会自动：
+The core auto-approval path is implemented through the official `PermissionRequest` hook.
 
-- 开启自动同意
-- 启动桌面悬浮窗
-- 用插件目录启动 Claude
+## Main features
 
-### 2. 关闭自动同意
+### 1. One-click startup
 
-```bat
-D:\AAAkaifa\Claude助手\bin\approval-helper-off.cmd
-```
-
-### 3. 重新开启
+Double-click:
 
 ```bat
-D:\AAAkaifa\Claude助手\bin\approval-helper-on.cmd
+启动Claude助手.bat
 ```
 
-### 4. 查看当前状态
+This launches Claude with the helper enabled and opens the floating window by default.
 
-```bat
-D:\AAAkaifa\Claude助手\bin\approval-helper-status.cmd
-```
+### 2. Floating desktop window
 
-## 能力边界
+The floating window stays on top and shows:
 
-- 这个插件能“自动批准”权限框，因为 Claude Code 官方 hooks 支持 `PermissionRequest` 决策。
-- 这个插件不能稳定拿到权限框里展示的所有原始英文 UI 文本，所以不能保证逐字翻译屏幕上看到的每一行英文。
-- 它当前做的是：对常见权限通知和 Bash 场景写中文摘要到日志文件和悬浮窗。
+- whether auto-approval is currently enabled
+- a button to turn auto-approval on or off
+- the latest approval-related Chinese summary
+- recent approval history
 
-## 日志位置
+### 3. Auto-approval for normal permission requests
+
+For standard Claude Code permission requests, the plugin returns `allow` automatically.
+
+### 4. Chinese summaries
+
+Common approval-related notifications and Bash request summaries are converted into Chinese so you can quickly understand what happened.
+
+### 5. Approval history
+
+The helper writes both:
+
+- a plain text log
+- a structured JSONL history file
+
+This makes it easier to review what was auto-approved later.
+
+## Current limitations
+
+- Some high-priority Bash safety prompts still require manual confirmation.
+- The helper cannot reliably translate every raw UI line shown inside Claude Code dialogs.
+- It is designed for local Windows usage and the current launcher is Windows-first.
+
+## Project structure
 
 ```text
-D:\AAAkaifa\Claude助手\approval-events.log
-D:\AAAkaifa\Claude助手\approval-events.jsonl
+.claude-plugin/
+bin/
+hooks/
+scripts/
+启动Claude助手.bat
 ```
+
+## Local files not committed
+
+These runtime and personal files are ignored by Git:
+
+- `.runtime/`
+- `approval-events.log`
+- `approval-events.jsonl`
+- `state.json`
+- `.claude/`
+
+## Log locations
+
+```text
+approval-events.log
+approval-events.jsonl
+```
+
+## Typical usage
+
+1. Double-click `启动Claude助手.bat`
+2. Claude starts with the helper enabled
+3. The floating window appears automatically
+4. Use the floating window button to toggle auto-approval if needed
+5. Review recent approval history directly in the floating window
+
+## Notes
+
+This is a local helper project, not an official Anthropic product.
